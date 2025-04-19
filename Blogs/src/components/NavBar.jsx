@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react'; // hamburger and close icons
 
 function NavBar() {
+    const [user, setUser] = useState();
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
     const [menuOpen, setMenuOpen] = useState(false);
