@@ -52,7 +52,7 @@ function Write() {
       navigate("/stories");
     } catch (error) {
       console.error("Error creating post:", error);
-      setMessage("Failed to create post. Try again.");
+      setMessage("Failed to create post.");
     }
   };
 
