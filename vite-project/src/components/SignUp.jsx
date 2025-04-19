@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import NavBar from "./NavBar";
+import { useNavigate } from "react-router-dom";
 
 function SignUp() {
     const [userData, setUserData] = useState({
@@ -11,7 +12,7 @@ function SignUp() {
     });
 
     const [message, setMessage] = useState("");
-
+    const navigate = useNavigate()
     const handleChange = (e) => {
         setUserData({ ...userData, [e.target.name]: e.target.value });
     };
@@ -25,7 +26,7 @@ function SignUp() {
         }
 
         try {
-            const response = await axios.post("http://localhost:4000/users", {
+            const response = await axios.post("http://localhost:8080/api/v1/users/register", {
                 name: userData.name,
                 email: userData.email,
                 password: userData.password,
@@ -33,6 +34,7 @@ function SignUp() {
 
             console.log("User Created:", response.data);
             setMessage("User created successfully!");
+            navigate("/login")
             setUserData({ name: "", email: "", password: "", confirmPassword: "" });
         } catch (error) {
             console.error("Error creating user:", error);

@@ -4,37 +4,39 @@ import axios from 'axios';
 import NavBar from './NavBar';
 
 function Login() {
-
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.get("http://localhost:4000/users");
-      const users = response.data;
-      const userExist = users.find((user) => user.email === email)
-      if (!userExist) {
-        setError("User not sign up yet, please signup now");
-        return;
-      }
+      const response = await axios.post("http://localhost:8080/api/v1/users/login", {
+        email,
+        password,
+      });
+      
+      const { token } = response.data.data;
 
-      if (userExist.password !== password) {
-        setError("Incorrect Password");
-        return;
-      }
+     
+      localStorage.setItem("token", token);
 
       setError("");
-      alert("Login Succesfully");
-      navigate("/write");
-      localStorage.setItem("user", JSON.stringify(userExist));
-      window.location.href = "/";
+      alert("Login Successfully");
 
-    } catch (error) {
-      console.log("Login Error:", error);
+      localStorage.setItem(response.data.data.token)
+      navigate("/");
+      
+
+     
+      
+
+    } catch (err) {
+      console.log("Login Error:", err);
+      const message = err.response?.data?.message || "Login failed. Please try again.";
+      setError(message);
     }
   };
 
@@ -48,7 +50,6 @@ function Login() {
           {error && <p className='text-red-500 text-center mb-4'>{error}</p>}
 
           <form onSubmit={handleLogin} className="space-y-4">
-            {/* Email Input */}
             <div>
               <label className="block text-gray-600 text-sm mb-1">Email</label>
               <input
@@ -61,7 +62,6 @@ function Login() {
               />
             </div>
 
-            {/* Password Input */}
             <div>
               <label className="block text-gray-600 text-sm mb-1">Password</label>
               <input
@@ -74,7 +74,6 @@ function Login() {
               />
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300"
@@ -83,7 +82,6 @@ function Login() {
             </button>
           </form>
 
-          {/* Signup & Forgot Password Links */}
           <div className="text-center mt-4">
             <p className="text-sm text-gray-600">
               Don't have an account?

@@ -15,41 +15,65 @@ function ViewPost() {
         author: "",
         image: ""
     });
-
+    const token = localStorage.getItem("token");
     useEffect(() => {
         const fetchPost = async () => {
-            try {
-                const response = await axios.get(
-                    `https://67f0d4a4c733555e24ab536e.mockapi.io/api/blogs/posts/${id}`
-                );
-                setPost(response.data);
-                setUpdatedData({
-                    title: response.data.title,
-                    content: response.data.content,
-                    author: response.data.author,
-                    image: response.data.image
-                });
-                setLoading(false);
-            } catch (error) {
-                console.error("Error fetching post:", error);
-                setLoading(false);
-            }
+          
+          try {
+            const response = await axios.get(
+              `http://localhost:8080/api/v1/blogs/${id}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+                withCredentials: true,
+              }
+            );
+      
+            const postData = response.data.data; // ✅ correctly access nested data
+            setPost(postData);
+            setUpdatedData({
+              title: postData.title,
+              content: postData.content,
+              author: postData.authorName, // adjust if it's `authorName`
+              image: postData.avatar || postData.image || "" // fallback if different naming
+            });
+            setLoading(false);
+          } catch (error) {
+            console.error("Error fetching post:", error);
+            setLoading(false);
+          }
         };
-
+      
         fetchPost();
-    }, [id]);
+      }, [id]);
+      
 
-    const handleDelete = async () => {
-        const confirm = window.confirm("Are you sure you want to delete this post?");
-        if (!confirm) return;
-
+      const handleDelete = async () => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this post?");
+        if (!confirmDelete) return;
+      
         try {
-            await axios.delete(`https://67f0d4a4c733555e24ab536e.mockapi.io/api/blogs/posts/${id}`);
-            navigate("/stories");
+          const token = localStorage.getItem("token");
+      
+          const response = await axios.delete(
+            `http://localhost:8080/api/v1/blogs/${id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              withCredentials: true,
+            }
+          );
+      
+          alert("Post deleted successfully!");
+          navigate("/stories");
         } catch (error) {
-            console.error("Error deleting post:", error);
+          console.error("Error deleting post:", error);
+          alert("Failed to delete the post. Please try again.");
         }
-    };
+      };
+      
 
     const handleEditToggle = () => {
         setEditing(!editing);
@@ -74,10 +98,15 @@ function ViewPost() {
         e.preventDefault();
 
         try {
-            const response = await axios.put(
-                `https://67f0d4a4c733555e24ab536e.mockapi.io/api/blogs/posts/${id}`,
-                updatedData
-            );
+            const response = await axios.get(
+                `http://localhost:8080/api/v1/blogs/${id}`, updatedData,
+                {
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                  withCredentials: true,
+                }
+              );
             setPost(response.data);
             setEditing(false);
         } catch (error) {

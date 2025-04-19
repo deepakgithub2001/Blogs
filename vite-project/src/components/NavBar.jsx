@@ -4,11 +4,11 @@ import { Menu, X } from 'lucide-react'; // hamburger and close icons
 
 function NavBar() {
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
     const [menuOpen, setMenuOpen] = useState(false);
 
     const handleLogout = () => {
-        localStorage.removeItem("user");
+        localStorage.removeItem("token");
         navigate("/login");
     };
 
@@ -37,7 +37,7 @@ function NavBar() {
                         <li className="cursor-pointer bg-yellow-400 px-3 py-1 rounded hover:bg-yellow-300">About</li>
                     </NavLink>
 
-                    {!user ? (
+                    {!token ? (
                         <>
                             <NavLink to="/login">
                                 <li className="cursor-pointer bg-yellow-400 px-3 py-1 rounded hover:bg-yellow-300">Log in</li>

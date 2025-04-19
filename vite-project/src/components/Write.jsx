@@ -8,10 +8,9 @@ function Write() {
   const [postData, setPostData] = useState({
     title: "",
     content: "",
-    author: "",
-    image: ""
+    authorName: ""
   });
-
+  const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
@@ -19,32 +18,38 @@ function Write() {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPostData({ ...postData, image: reader.result });
-      };
-      reader.readAsDataURL(file);
-    }
+    setImageFile(e.target.files[0]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    const formData = new FormData();
+    formData.append("title", postData.title);
+    formData.append("content", postData.content);
+    formData.append("authorName", postData.authorName);
+    if (imageFile) {
+      formData.append("avatar", imageFile); // name must match Multer field name
+    }
 
     try {
       const response = await axios.post(
-        "https://67f0d4a4c733555e24ab536e.mockapi.io/api/blogs/posts",
+        "http://localhost:8080/api/v1/blogs",
+        formData,
         {
-          ...postData,
-          createdAt: new Date().toISOString(),
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
         }
       );
-
       console.log("Post Created:", response.data);
       setMessage("Post created successfully!");
-      setPostData({ title: "", content: "", author: "", image: "" });
-      navigate(`/stories/${response.data.id}`);
+      setPostData({ title: "", content: "", authorName: "" });
+      setImageFile(null);
+      navigate("/stories");
     } catch (error) {
       console.error("Error creating post:", error);
       setMessage("Failed to create post. Try again.");
@@ -66,7 +71,7 @@ function Write() {
               value={postData.title}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full p-2 border border-gray-300 rounded"
             />
             <textarea
               name="content"
@@ -74,8 +79,8 @@ function Write() {
               value={postData.content}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
               rows={4}
+              className="w-full p-2 border border-gray-300 rounded"
             />
             <input
               type="file"
@@ -85,16 +90,16 @@ function Write() {
             />
             <input
               type="text"
-              name="author"
+              name="authorName"
               placeholder="Enter author name"
-              value={postData.author}
+              value={postData.authorName}
               onChange={handleChange}
               required
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full p-2 border border-gray-300 rounded"
             />
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white font-semibold py-2 rounded hover:bg-blue-600 transition duration-200"
+              className="w-full bg-blue-500 text-white font-semibold py-2 rounded hover:bg-blue-600"
             >
               Submit Post
             </button>

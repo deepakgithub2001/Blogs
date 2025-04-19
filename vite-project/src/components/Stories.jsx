@@ -7,14 +7,22 @@ function Stories() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const token = localStorage.getItem("token"); // ✅ Fixed typo
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get("https://67f0d4a4c733555e24ab536e.mockapi.io/api/blogs/posts");
-      setPosts(response.data.reverse());
-      setLoading(false);
+      const response = await axios.get("http://localhost:8080/api/v1/blogs", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      });
+
+      console.log("Fetched posts:", response.data.data);
+      setPosts(response.data.data || []);
     } catch (error) {
       console.error("Error fetching posts:", error);
+    } finally {
       setLoading(false);
     }
   };
@@ -37,18 +45,18 @@ function Stories() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {posts.map((post) => (
               <div
-                key={post.id}
+                key={post.id || post._id}
                 className="bg-white rounded-xl shadow-md p-4 transition hover:shadow-lg"
               >
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-xl font-semibold text-gray-700">{post.title}</h2>
                     <div className="text-sm text-gray-500">
-                      By <span className="font-medium">{post.author}</span>
+                      By <span className="font-medium">{post.authorName}</span>
                     </div>
                   </div>
                   <button
-                    onClick={() => navigate(`/stories/${post.id}`)}
+                    onClick={() => navigate(`/stories/${post.id || post._id}`)}
                     className="ml-4 p-1.5 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition"
                   >
                     Read More
@@ -62,4 +70,5 @@ function Stories() {
     </>
   );
 }
+
 export default Stories;
